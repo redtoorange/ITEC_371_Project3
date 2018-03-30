@@ -12,6 +12,7 @@
 #include <vector>
 #include <memory>
 #include <ostream>
+#include "ProgramFile.h"
 
 class File;
 class TextFile;
@@ -59,6 +60,8 @@ public:
 
 	//! Retrieve a textfile from this directory by name, the .t extension is optional. Returns nullptr if nothing found.
 	TextFile* getTextfile(const std::string& name);
+
+	ProgramFile* getProgramfile(const std::string& name);
 
 private:
 	//! All child objects of this DIR are stored here

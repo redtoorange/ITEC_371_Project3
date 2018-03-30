@@ -28,7 +28,12 @@ const std::string cmd[] = {
 	"start",
 	"step",
 	"cd",
-	"quit",
+	"addProgram",
+	"getmemory",
+	"setmemory",
+	"SETBURST",
+	"GETBURST",
+	"quit"
 };
 
 //! Contains the enumerated version of all commands.
@@ -42,7 +47,13 @@ enum Commands : int{
 	START = 6,
 	STEP = 7,
 	CD = 8,
-	QUIT = 9
+	ADD_PRO = 9,
+	GET_MEM = 10,
+	SET_MEM = 11,
+	SET_BURST = 12,
+	GET_BURST = 13,
+	QUIT = 14
+	
 };
 
 //! Check two string to see if they are equal, ignoring case.

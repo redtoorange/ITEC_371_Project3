@@ -135,6 +135,22 @@ TextFile* Directory::getTextfile(const std::string& name)
 	return nullptr;
 }
 
+ProgramFile* Directory::getProgramfile(const std::string& name)
+{
+	// Search through all children to find one with a matching name
+	for( auto& e : objects)
+	{
+		// Try to cast to a TextFile, or nullptr if fails
+		ProgramFile* p = dynamic_cast<ProgramFile*>(e.get());
+		if( p && (p->getFileName() == name || name == p->getFileName() + ".p" ) )
+		{
+			return p;
+		}
+	}
+
+	return nullptr;
+}
+
 void Directory::writeToFile(std::ofstream& stream)
 {
 	stream << fileName;

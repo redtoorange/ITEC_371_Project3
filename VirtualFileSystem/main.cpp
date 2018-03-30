@@ -4,12 +4,18 @@
  *	3/2/2018
 */
 
+#include <istream>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <sstream>
 
 #include "Util.h"
 #include "Directory.h"
 #include "TextFile.h"
+#include "Scheduler.h"
+#include "ProgramFile.h"
+
 
 using  std::cout;
 using  std::cin;
@@ -24,6 +30,8 @@ Directory* currentDirectory;
 
 //! Holds a pointer to the root for comparison during runtime
 Directory* rootPointer;
+
+Scheduler scheduler;
 
 /*!
 * \brief Attempt to create a new directory.  If the directory is made successfully, 
@@ -65,12 +73,60 @@ void createTextFile( )
 	{
 		const auto file = TextFile::makeTextFile(fileName);
 		if( file )
-		currentDirectory->addObject( file );
+			currentDirectory->addObject( file );
 	}
 	else
 	{
 		cout << "TextFiles must end in .t" << endl;
 	} 
+}
+
+void createProgramFile( const std::string& programData )
+{
+	std::stringstream ss{programData};
+	string item;
+	std::queue<string> tokens;
+
+	// Parse tokens out of the program line
+	while( std::getline(ss, item, ' '))
+	{
+		tokens.push(item);
+	}
+
+	// Ensure we have atleast 3 tokens: Name, time and memory
+	if( tokens.size() < 3)
+	{
+		cout << "Error: Program files must be in format [name] [time] [memory]\n";
+	}
+	else
+	{
+		string name{tokens.front()};
+		tokens.pop();
+
+		int time = std::stoi(tokens.front());
+		tokens.pop();
+
+		int mem = std::stoi(tokens.front());
+		tokens.pop();
+
+		int doesIO = 0;
+		int timeIO = 0;
+		int amountIO = 0;
+
+		if( tokens.size() >= 2)
+		{
+			doesIO = 1;
+			timeIO = std::stoi(tokens.front());
+			tokens.pop();
+			amountIO = std::stoi(tokens.front());
+			tokens.pop();
+		}
+
+		const auto file = ProgramFile::makeProgramFile(name, time, mem, doesIO, timeIO, amountIO);
+		if( file )
+			currentDirectory->addObject( file );
+	}
+	
 }
 
 /*!
@@ -108,6 +164,18 @@ void printTextFile(const string& fileName)
 		cout << "Could not read from <" << fileName << ">" << endl;
 }
 
+void startProcess(const string& fileName)
+{
+	// Try to get the file
+	ProgramFile* program = currentDirectory->getProgramfile( fileName );
+
+	// Print the file if it exists
+	if( program )
+		scheduler.addProcess( program );	
+	else
+		cout << "Could not find <" << fileName << "> \n";
+}
+
 /**!
  *	\brief Handle complex commands that take an argument
  */
@@ -130,20 +198,28 @@ bool handleCompound(Commands command, const std::string& input )
 				printTextFile(input.substr(len));
 				break;
 
-			case RUN:
-				cout << "Running " << input.substr(len) << endl;
+			case ADD_PRO:
+				createProgramFile(input.substr(len));
 				break;
 
 			case START:
-				cout << "Starting " << input.substr(len) << endl;
+				startProcess(input.substr(len));
 				break;
 
 			case STEP:
-				cout << "Stepping " << input.substr(len) << endl;
+				scheduler.step( std::stoi(input.substr(len)));
 				break;
 
 			case CD:
 				tryToChangeDir( input.substr(3) );
+				break;
+
+			case SET_MEM:
+				scheduler.setMemory( std::stoi(input.substr(len)));
+				break;
+
+			case SET_BURST:
+				scheduler.setBurst( std::stoi(input.substr(len)));
 				break;
 
 			default:
@@ -188,6 +264,30 @@ bool handleSimple(Commands command, const std::string& input )
 				cout << "Error: Malformed input, <pwd> is required format." << std::endl;	
 			break;
 
+		case RUN:
+			// Run the current stuff in the scheduler
+			scheduler.run();
+			break;
+
+		case GET_MEM:
+			{
+				int m = scheduler.getMemory();
+				if( m == -1 )
+					cout << "System Memory has not been configured." << endl;
+				else
+					cout << "System Memory: " << m << endl;
+			}
+			break;
+		case GET_BURST:
+			{
+				int b = scheduler.getBurst();
+				if( b == -1 )
+					cout << "System Burst has not been configured." << endl;
+				else
+					cout << "System Burst Time: " << b << endl;
+			}
+			break;
+
 		case QUIT:
 			running = false;
 			break;
@@ -206,9 +306,9 @@ bool executeCommand( Commands command, const std::string& input )
 {
 	switch(command)
 	{
-		case MKDIR: case CAT: case RUN: case START: case STEP: case CD:
+	case MKDIR: case CAT:  case START:  case CD: case ADD_PRO: case SET_MEM: case SET_BURST: case STEP:
 			return handleCompound(command, input);
-		case CREATE_TEXT: case LIST: case PWD: case QUIT:
+	case CREATE_TEXT: case LIST: case PWD: case RUN: case GET_MEM: case GET_BURST:  case QUIT:
 			return handleSimple(command, input);
 	}
 
@@ -281,8 +381,8 @@ std::shared_ptr<Directory>  readInFile( const string& filename )
 			currentDirectory->addObject( TextFile::inflateTextFile(parsed, inFile));
 
         // REMOVED: We found a program
-		//else if( extension == ".p")
-		//	currentDirectory->addObject( ProgramFile::inflateProgramFile(parsed, inFile));
+		else if( extension == ".p")
+			currentDirectory->addObject( ProgramFile::inflateProgramFile(parsed, inFile));
 	
         // found an endX token, close the current directory
         else if( parsed.find_first_of("end" + currentDirectory->getFileName()) == 0)
