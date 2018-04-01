@@ -1,10 +1,19 @@
 CXX = g++
 CXXFLAGS = -std=c++11 
 
-OBJECTS =   FSObject.o Directory.o File.o Util.o TextFile.o main.o
+OBJECTS =   FSObject.o Directory.o File.o Util.o TextFile.o  ProgramFile.o Process.o Scheduler.o main.o
 
 all: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -static-libstdc++ -o RUSH main.o FSObject.o Directory.o File.o Util.o TextFile.o
+	$(CXX) $(CXXFLAGS) -static-libstdc++ -o RATCH main.o FSObject.o Directory.o File.o Util.o TextFile.o ProgramFile.o Process.o Scheduler.o
+
+ProgramFile.o:
+	g++ $(CXXFLAGS) -c ProgramFile.cpp
+
+Process.o:
+	g++ $(CXXFLAGS) -c Process.cpp
+
+Scheduler.o:
+	g++ $(CXXFLAGS) -c Scheduler.cpp
 
 Util.o:
 	g++ $(CXXFLAGS) -c Util.cpp

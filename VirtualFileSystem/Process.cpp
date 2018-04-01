@@ -1,8 +1,9 @@
 ﻿#include "Process.h"
 #include <sstream>
 
-Process::Process(ProgramFile* program)
+Process::Process(ProgramFile* program, int timestarted) : timeStarted(timestarted)
 {
+
 	// Populate the process data
 	memoryRequired = program->memory_requirements();
 	timeRequired = program->time_requirements();
@@ -21,14 +22,19 @@ bool Process::isFinished()
 	return unitsRun == timeRequired;
 }
 
-void Process::tickMain()
+void Process::tickMain( int currentTime )
 {
+		
+
 	unitsRun++;
+
+	if( isFinished() )
+		timeFinished = currentTime + 1;
 }
 
 void Process::tickIO()
 {
-	timeToIO--;
+	amountOfIO--;
 }
 
 bool Process::shouldSleepForIO()
@@ -61,7 +67,27 @@ std::string Process::getData()
 {
 	std::stringstream ss;
 
-	ss << name << " has " << getTimeRemaining() << " time left and is using " << getMemoryRequired() << " memory";
+	ss << name << " has " << getTimeRemaining() << " time left and is using " << getMemoryRequired() << " memory resources.";
 
 	return ss.str();
+}
+
+int Process::getRemainingIOTime()
+{
+	return amountOfIO;
+}
+
+std::string Process::getFinishedData()
+{
+	std::stringstream ss;
+
+	ss << name << " " << getTimeRequired() << " " << (timeFinished - timeStarted);
+
+	return ss.str();
+}
+
+
+std::string Process::getName()
+{
+	return name;
 }

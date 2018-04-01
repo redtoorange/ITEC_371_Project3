@@ -8,7 +8,7 @@ CONTENTS OF THIS FILE
 1) Introduction
 ---------------------
 
-The files in this directory are part of project 2 for ITEC 371 at Radford 
+The files in this directory are part of project 3 for ITEC 371 at Radford 
 	University.  The goal of the project was to create a simulated Shell 
 	environment, in the vein of a Linux Bash shell.
 
@@ -44,7 +44,30 @@ The shell will allow a variety of different instructions:
 	
 	createTextfile <filename> - Create a text file of the particular name, 
 		and prompt the user for its contents
-
+	
+	start <program> - Add a program to the scheduler to manage and run.
+	
+	step <number> - Advanced the scheduler and the system be thespecified
+		number of time units.
+		
+	setBurst <number> - Set the amount of time a process will be allocated by
+		the scheduler before it is swapped by the next process.
+		
+	setMemory <number> - Set the total amount of memory that the system has
+		to allocate to all processes.
+		
+	getMemory	 - Get the total amount of memory that the system has.
+	
+	getBurst - Get the amount of time processes are allocated before they are
+		swapped.
+		
+	run - Run the simulation until all jobs are completed.
+	
+	addProgram <name> <timeRequirement> <memoryRequirement> - Add a program to
+		the current directory.  It will require the amount of time and memory to run.
+		Optional Parameter: <timeToDoIO> <AmountOfIOTime> - must both be given as
+			integers.  This specifies when the process will sleep for IO and for how long.
+	
 2) Requirements
 ---------------------
 
@@ -60,7 +83,7 @@ To build the system, just use the make command from a terminal.  The make
 	file will instruct the compiler/linker on how to build the system.
 
 Once the program has been built, it can be executed from a terminal with 
-	./RUFS <filename>
+	./RATCH <filename>
 	
 	* Replace <filename> with the name of the file you want to load/save to.  
 	The extension does not matter.
@@ -91,3 +114,17 @@ Once the program has been built, it can be executed from a terminal with
 		
 	TextFile.*
 		A file with specific operations for handling the "metadata."
+	
+	ProgramFile.*
+		Contains the data about a program.  How long it needs to run, how much
+		memory it requires and how to handle IO.
+		
+	Process.*
+		When a program is executed, a process object is spawned to manage the
+		instance of the program.  The process tracks when it was executed, for 
+		how long and it's current status.
+		
+	Scheduler.*
+		The system has a single scheduler that manages all running processes
+		on the system.  The scheduler has queues to track running, waiting
+		and finished jobs on the system.

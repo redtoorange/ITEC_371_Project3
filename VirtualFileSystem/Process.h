@@ -4,20 +4,24 @@
 class Process
 {
 public:
-	Process( ProgramFile* program );
+	Process( ProgramFile* program, int timestarted );
 	
 	int getMemoryRequired();
 	int getTimeRequired();
 	int getTimeRemaining();
+	int getRemainingIOTime();
 
 	bool shouldSleepForIO();
 	bool shouldWakeFromIO();
 
-	void tickMain();
+	void tickMain( int currentTime );
 	void tickIO();
 
 	bool isFinished();
+
 	std::string getData();
+	std::string getFinishedData();
+	std::string getName();
 
 private:
 	std::string name;
@@ -29,4 +33,7 @@ private:
 
 	int timeToIO;
 	int amountOfIO;
+
+	int timeStarted;
+	int timeFinished;
 };
