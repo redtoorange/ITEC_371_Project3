@@ -1,15 +1,21 @@
-﻿#include "Process.h"
+﻿/*
+ *	Andrew McGuiness
+ *	ITEC 371 - Project 3
+ *	4/1/2018
+*/
+
+#include "Process.h"
 #include <sstream>
 
 Process::Process(ProgramFile* program, int timestarted) : timeStarted(timestarted)
 {
 
 	// Populate the process data
-	memoryRequired = program->memory_requirements();
-	timeRequired = program->time_requirements();
+	memoryRequired = program->getMemoryRequirements();
+	timeRequired = program->getTimeRequirements();
 
-	timeToIO = program->time_to_do_io();
-	amountOfIO = program->amout_of_io_time();
+	timeToIO = program->getTimeToDoIO();
+	amountOfIO = program->getAmoutOfIO();
 
 	name = program->getFileName();
 
@@ -24,8 +30,6 @@ bool Process::isFinished()
 
 void Process::tickMain( int currentTime )
 {
-		
-
 	unitsRun++;
 
 	if( isFinished() )

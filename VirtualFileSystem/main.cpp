@@ -1,7 +1,7 @@
 /*
  *	Andrew McGuiness
- *	ITEC 371 - Project 2
- *	3/2/2018
+ *	ITEC 371 - Project 3
+ *	4/1/2018
 */
 
 #include <istream>
@@ -31,6 +31,7 @@ Directory* currentDirectory;
 //! Holds a pointer to the root for comparison during runtime
 Directory* rootPointer;
 
+//! The system's Scheduler manages all running, waiting and finished processes
 Scheduler scheduler;
 
 /*!
@@ -81,8 +82,16 @@ void createTextFile( )
 	} 
 }
 
+
+/**!
+ *	\brief Parse user input into a programFile, then store the ProgramFile in the
+ *	current directory.
+ *	
+ *	\param programData The string of user input to pull data from.
+ */
 void createProgramFile( const std::string& programData )
 {
+	// Tokenize the user's input string
 	std::stringstream ss{programData};
 	string item;
 	std::queue<string> tokens;
@@ -100,6 +109,7 @@ void createProgramFile( const std::string& programData )
 	}
 	else
 	{
+		// Parse the three required fields
 		string name{tokens.front()};
 		tokens.pop();
 
@@ -109,6 +119,7 @@ void createProgramFile( const std::string& programData )
 		int mem = std::stoi(tokens.front());
 		tokens.pop();
 
+		// Attempt to parse out the IO paramaters if they exist
 		int doesIO = 0;
 		int timeIO = 0;
 		int amountIO = 0;
@@ -122,6 +133,7 @@ void createProgramFile( const std::string& programData )
 			tokens.pop();
 		}
 
+		// Create the ProgramFile and store it in the current directory
 		const auto file = ProgramFile::makeProgramFile(name, time, mem, doesIO, timeIO, amountIO);
 		if( file )
 			currentDirectory->addObject( file );
@@ -164,12 +176,17 @@ void printTextFile(const string& fileName)
 		cout << "Could not read from <" << fileName << ">" << endl;
 }
 
+
+/**!
+ *	\brief Search for a ProgramFile and if one is found, try to create a process
+ *	in the scheduler.
+ */
 void startProcess(const string& fileName)
 {
-	// Try to get the file
+	// Try to get the program file
 	ProgramFile* program = currentDirectory->getProgramfile( fileName );
 
-	// Print the file if it exists
+	// Send the program file to the scheduler to try and create a process
 	if( program )
 		scheduler.addProcess( program );	
 	else

@@ -1,17 +1,19 @@
 ﻿/*
  *	Andrew McGuiness
- *	ITEC 371 - Project 2
- *	3/2/2018
+ *	ITEC 371 - Project 3
+ *	4/1/2018
 */
 
 #ifndef PROGRAM_FILE_H
 #define PROGRAM_FILE_H
 
-#include "File.h"
 #include <memory>
 
+#include "File.h"
+
 /*!
-*	\brief NOT USED!!!!
+*	\brief A special type of file that contains the necessary metadata to be executed.  ProgramFiles can be loaded
+*	into a Scheduler which will spawn a process, an object that contains running process data.
 */
 class ProgramFile : public File
 {
@@ -34,15 +36,22 @@ public:
 	//! Write the program file out to a stream
 	void writeToFile(std::ofstream& stream) override;
 
+	//! Get how much memory this program requires on the scheduler to run
+	int getMemoryRequirements() const;
 
-	int memory_requirements() const;
-	int time_requirements() const;
-	int needs_io() const;
-	int time_to_do_io() const;
-	int amout_of_io_time() const;
+	//! Get the number of time units this program needs to run for to finish
+	int getTimeRequirements() const;
+
+	//! 0 = this program doesn't need IO, 1 = this program needs IO
+	int getNeedsIO() const;
+	
+	//! What time does this program need to go do IO
+	int getTimeToDoIO() const;
+	
+	//! How long will this program need to perform IO
+	int getAmoutOfIO() const;
 
 private:
-//	int cpuRequirements;
 	int memoryRequirements;
 	int timeRequirements;
 

@@ -1,7 +1,7 @@
 ﻿/*
  *	Andrew McGuiness
- *	ITEC 371 - Project 2
- *	3/2/2018
+ *	ITEC 371 - Project 3
+ *	4/1/2018
 */
 
 #include "ProgramFile.h"
@@ -86,8 +86,6 @@ void ProgramFile::printData(int tabs)
 		std::cout << t << "\t" << "IO Time   : " << timeToDoIO << std::endl;
 		std::cout << t << "\t" << "IO Amount : " << amoutOfIoTime << std::endl;
 	}
-	
-
 }
 
 
@@ -101,7 +99,7 @@ void ProgramFile::writeToFile(std::ofstream& stream)
 	stream << ".p";
 	stream << '\0';
 
-	// Ugly, but it writes the ints to the file as char arrays
+	// Write the objects state into the file
 	stream.write((char*)&timeRequirements, sizeof(timeRequirements));
 	stream.write((char*)&memoryRequirements, sizeof(memoryRequirements));
 
@@ -111,27 +109,27 @@ void ProgramFile::writeToFile(std::ofstream& stream)
 	
 }
 
-int ProgramFile::memory_requirements() const
+int ProgramFile::getMemoryRequirements() const
 {
 	return memoryRequirements;
 }
 
-int ProgramFile::time_requirements() const
+int ProgramFile::getTimeRequirements() const
 {
 	return timeRequirements;
 }
 
-int ProgramFile::needs_io() const
+int ProgramFile::getNeedsIO() const
 {
 	return needsIO;
 }
 
-int ProgramFile::time_to_do_io() const
+int ProgramFile::getTimeToDoIO() const
 {
 	return timeToDoIO;
 }
 
-int ProgramFile::amout_of_io_time() const
+int ProgramFile::getAmoutOfIO() const
 {
 	return amoutOfIoTime;
 }
@@ -151,8 +149,7 @@ std::shared_ptr<ProgramFile> ProgramFile::inflateProgramFile(std::string& name, 
 	int timeIO;
 	int amountIO;
 	
-	
-	// Again, ugly, but it reads the ints back from char arrays
+	// Load the object's state from the file
 	stream.read((char*)&t, sizeof(t));
 	stream.read((char*)&m, sizeof(m));
 

@@ -1,4 +1,10 @@
-﻿#include "Scheduler.h"
+﻿/*
+ *	Andrew McGuiness
+ *	ITEC 371 - Project 3
+ *	4/1/2018
+*/
+
+#include "Scheduler.h"
 #include <ostream>
 #include <iostream>
 
@@ -10,6 +16,7 @@ Scheduler::Scheduler(int mem, int burst)
 
 void Scheduler::run()
 {
+	// Ensure that the burst time is atleast 1
 	if( burstTime <= 0 )
 	{
 		std::cout << "Burst Time must be configured and greater than 0 before running.\n";
@@ -18,65 +25,19 @@ void Scheduler::run()
 
 	std::cout << "Advancing the system until all jobs finished\n";
 
+	// Tick the system until all jobs done
 	while( currentProcess || !runningJobs.empty() || !waitingOnIOJobs.empty())
 	{
 		tickSystem();
 	}
 
+	// Final system update
 	printSystemUpdate();
 }
 
 
-void Scheduler::tickSystem()
+void Scheduler::checkForWakingIO()
 {
-	if( !currentProcess || remainingBurst == 0)
-	{
-		if( currentProcess )
-			runningJobs.push( currentProcess );
-
-		if( !runningJobs.empty() )
-		{
-			currentProcess = runningJobs.front();
-			runningJobs.pop();
-			remainingBurst = burstTime;
-
-			printSystemUpdate();
-		}
-		else if(!waitingOnIOJobs.empty())
-		{
-			std::cout << "No processes to run, waiting on IO.\n";
-		}
-		else
-		{
-			std::cout << "All queues are empty.\n";
-			return;
-		}
-	}
-
-
-	// Find a process
-	if( currentProcess )
-	{
-		currentProcess->tickMain( currentTime );
-	}
-
-	// Run that process
-	tickIOJobs();
-
-	if (currentProcess && currentProcess->shouldSleepForIO())
-	{
-		waitingOnIOJobs.push( currentProcess );
-		currentProcess = nullptr;
-	}
-
-	// If they are done, remove to the running
-	if( currentProcess && currentProcess->isFinished())
-	{
-		finishProcess( currentProcess );
-		currentProcess = nullptr;
-	}
-
-
 	std::queue<std::shared_ptr<Process>> tempJobs;
 	while( !waitingOnIOJobs.empty() )
 	{
@@ -93,6 +54,61 @@ void Scheduler::tickSystem()
 		}
 	}
 	waitingOnIOJobs = tempJobs;
+}
+
+void Scheduler::tickSystem()
+{
+	// If it's time to swap or the current process has been moved off queue
+	if( !currentProcess || remainingBurst == 0)
+	{
+		// Used when the burst is finished
+		if( currentProcess )
+			runningJobs.push( currentProcess );
+
+		// Grab the next process available
+		if( !runningJobs.empty() )
+		{
+			// Grab the next process
+			currentProcess = runningJobs.front();
+			runningJobs.pop();
+			remainingBurst = burstTime;
+			std::cout << "Next burst time <" << remainingBurst << ">\n";
+
+			// Update with system output
+			printSystemUpdate();
+		}
+		else if(!waitingOnIOJobs.empty())
+		{
+			std::cout << "No processes to run, waiting on IO.\n";
+		}
+		else
+		{
+			std::cout << "All queues are empty.\n";
+			return;
+		}
+	}
+
+
+	// Find a process
+	if( currentProcess )
+		currentProcess->tickMain( currentTime );
+
+
+	tickIOJobs();
+
+	// Move the current job
+	if (currentProcess && currentProcess->shouldSleepForIO())
+	{
+		waitingOnIOJobs.push( currentProcess );
+		currentProcess = nullptr;
+	}
+	if( currentProcess && currentProcess->isFinished())
+	{
+		finishProcess( currentProcess );
+		currentProcess = nullptr;
+	}
+
+	checkForWakingIO();
 
 	currentTime++;
 	remainingBurst--;
@@ -173,9 +189,9 @@ int Scheduler::getBurst()
 
 void Scheduler::addProcess(ProgramFile* program)
 {
-	if( program->memory_requirements() <= (memoryLimit - memoryUsage))
+	if( program->getMemoryRequirements() <= (memoryLimit - memoryUsage))
 	{
-		memoryUsage += program->memory_requirements();
+		memoryUsage += program->getMemoryRequirements();
 		runningJobs.push( std::make_shared<Process>(program, currentTime));
 		
 		std::cout << program->getFileName() << " has been added to scheduler.\n";

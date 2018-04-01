@@ -1,17 +1,17 @@
 ﻿/*
  *	Andrew McGuiness
- *	ITEC 371 - Project 2
- *	3/2/2018
+ *	ITEC 371 - Project 3
+ *	4/1/2018
 */
 
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 
-#include "FSObject.h"
-
 #include <vector>
 #include <memory>
 #include <ostream>
+
+#include "FSObject.h"
 #include "ProgramFile.h"
 
 class File;
