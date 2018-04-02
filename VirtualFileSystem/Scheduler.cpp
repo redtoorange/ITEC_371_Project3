@@ -23,7 +23,7 @@ void Scheduler::run()
 		return;
 	}
 
-	std::cout << "Advancing the system until all jobs finished\n";
+	std::cout << "\nAdvancing the system until all jobs finished\n";
 
 	// Tick the system until all jobs done
 	while( currentProcess || !runningJobs.empty() || !waitingOnIOJobs.empty())
@@ -72,10 +72,10 @@ void Scheduler::tickSystem()
 			currentProcess = runningJobs.front();
 			runningJobs.pop();
 			remainingBurst = burstTime;
-			std::cout << "Next burst time <" << remainingBurst << ">\n";
-
+			
 			// Update with system output
 			printSystemUpdate();
+			std::cout << "Next burst time <" << remainingBurst << ">\n";
 		}
 		else if(!waitingOnIOJobs.empty())
 		{
@@ -137,7 +137,7 @@ void Scheduler::step(int amount)
 		return;
 	}
 
-	std::cout << "Advancing the system for " << amount << " units or until all jobs finished\n";
+	std::cout << "\nAdvancing the system for " << amount << " units or until all jobs finished\n";
 
 	while( amount > 0 && (currentProcess || !runningJobs.empty() || !waitingOnIOJobs.empty()) )
 	{
@@ -193,8 +193,6 @@ void Scheduler::addProcess(ProgramFile* program)
 	{
 		memoryUsage += program->getMemoryRequirements();
 		runningJobs.push( std::make_shared<Process>(program, currentTime));
-		
-		std::cout << program->getFileName() << " has been added to scheduler.\n";
 	}
 	else
 	{
@@ -270,7 +268,7 @@ void Scheduler::printFinishedQueue()
 
 void Scheduler::printSystemUpdate()
 {
-	std::cout << "Current time <" << currentTime << ">\n";
+	std::cout << "\nCurrent time <" << currentTime << ">\n";
 
 	printCurrentJob();		
 	printRunningQueue();
